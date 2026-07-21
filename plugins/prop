@@ -2,12 +2,16 @@
 
 set -eo pipefail
 
-VERSION="r40"
+VERSION="r41"
 
 TMP=/tmp/$(uuidgen)
 
 # Version
-echo "# NothingMuch ROM $VERSION by arter97" >> out/system/system/build.prop
+# NothingMuchMore continues arter97's NothingMuch ROM; keep his credit in every build.
+echo "# NothingMuchMore ROM $VERSION - continuation of NothingMuch by arter97, maintained by sappy" >> out/system/system/build.prop
+echo "ro.nothingmuchmore.version=$VERSION" >> out/system/system/build.prop
+echo "ro.nothingmuchmore.maintainer=sappy" >> out/system/system/build.prop
+echo "ro.nothingmuchmore.base=NothingMuch by arter97" >> out/system/system/build.prop
 
 # DPI
 cp out/product/etc/build.prop $TMP

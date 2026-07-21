@@ -2,20 +2,31 @@
 
 set -eo pipefail
 
+# arter97 used apktool (old .yml schema) + a signapk wrapper. On this machine the
+# packaged apktool is 3.x (can't read his .yml) and there's no signapk, so:
+#   - build with a pinned apktool 2.9.3 jar that reads the old schema
+#   - zipalign + sign with the AOSP platform testkey via apksigner
+WS=/home/sappy/projects/nothingmuch-pong
+APKTOOL="java -jar $WS/tools-apktool_2.9.3.jar"
+BT=/home/sappy/Android/Sdk/build-tools/36.0.0
+KEY=$WS/keys/testkey.pk8
+CERT=$WS/keys/testkey.x509.pem
+
 cd overlay
 while read d; do
   (
-  cd $d
-  apktool b
+  cd "$d"
+  $APKTOOL b
   cd dist
-  signapk *.apk
-  chown 0:0 *.apk
-  chmod 644 *.apk
-  chcon u:object_r:system_file:s0 *.apk
-  ls -al *.apk
-  mv *.apk ../../../out/product/overlay/
-  cd ../..
-  ) &
+  apk=$(ls *.apk | grep -v '\.aligned$')
+  "$BT/zipalign" -f 4 "$apk" "$apk.aligned"
+  mv "$apk.aligned" "$apk"
+  "$BT/apksigner" sign --key "$KEY" --cert "$CERT" --v4-signing-enabled false "$apk"
+  chown 0:0 "$apk"
+  chmod 644 "$apk"
+  setfattr -n security.selinux -v u:object_r:system_file:s0 "$apk"
+  ls -al "$apk"
+  mv "$apk" ../../../out/product/overlay/
+  )
 done < <(ls -d */)
-wait
 cd ..

@@ -11,5 +11,5 @@ for f in out/system/system/etc/init/cameraserver.rc out/vendor/etc/init/android.
   cat $TMP > $f
   rm $TMP
   file $f
-  batcat $f
+  cat $f
 done

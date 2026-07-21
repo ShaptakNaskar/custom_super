@@ -2,7 +2,7 @@
 system/system/etc/selinux/plat_sepolicy_and_mapping.sha256
 
 # 64bo
-system/system/etc/init/hw/init.zygote64_32.rc
+# (kept for dual zygote / 32-bit WebView) system/system/etc/init/hw/init.zygote64_32.rc
 system/system/framework/arm
 system/system/framework/oat/arm
 system_ext/framework/oat/arm

@@ -11,3 +11,12 @@
 !attr/*.txt
 !prebuilt/**
 !.git**
+overlay/*/build/
+overlay/*/dist/
+out/
+orig/
+.files/
+
+# Stock proprietary APKs - extract with scripts/extract_stock_webview.sh
+files/product/app/WebViewGoogle64/WebViewGoogle64.apk
+files/product/app/TrichromeLibrary64/TrichromeLibrary64.apk

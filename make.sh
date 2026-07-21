@@ -21,17 +21,20 @@ ALIGN=$((4 * 1024 * 1024)) # 4 MiB
 
 SUPER_SIZE=7516192768
 
+# NOS 4.1 system/system_ext outgrew arter97's 4.0 ext4 caps and all-ext4 can't fit the 7GiB super.
+# Build them as erofs (compressed, read-only) like product already is and like stock 4.1 ships them.
 ODM_SIZE=2
 PRODUCT_SIZE=0
-SYSTEM_EXT_SIZE=1285
-SYSTEM_SIZE=1440
+SYSTEM_EXT_SIZE=1400
+SYSTEM_SIZE=1600
 VENDOR_DLKM_SIZE=45
-VENDOR_SIZE=3180
+# erofs (0): without 64bo the 32-bit vendor libs are kept, so vendor no longer fits ext4; compress it like stock
+VENDOR_SIZE=0
 
 ACTIVE_SLOT=a
 INACTIVE_SLOT=b
 
-STOCK_FIRMWARE=/home/arter97/android/nothing/4.0-260226/dyn
+STOCK_FIRMWARE=/home/sappy/projects/nothingmuch-pong/dyn-4.1
 
 TMP=/tmp/$(uuidgen)
 
@@ -89,8 +92,10 @@ setfacl -P --restore=../attr/acl.txt
 setfattr -h --restore=../attr/xattr.txt
 # Override them from stock attributes
 LIST=$(find .)
-( cd ../orig; getfacl -Pn $(ls -d $LIST 2>/dev/null) ) | setfacl -P --restore=-
-( cd ../orig; getfattr -dhP -m- $(ls -d $LIST 2>/dev/null) ) | setfattr -h --restore=-
+# NOS 4.1 makes bionic (libc/libm) symlinks into the runtime APEX -> ELOOP on offline stock mount.
+# Those files are replaced from files/ anyway (also in remove.txt), so tolerate unreadable stock attrs.
+( cd ../orig; getfacl -Pn $(ls -d $LIST 2>/dev/null) ) | setfacl -P --restore=- || true
+( cd ../orig; getfattr -dhP -m- $(ls -d $LIST 2>/dev/null) ) | setfattr -h --restore=- || true
 ( find */ -exec ls -aldnZ {} + | grep '?' ) || true
 cd ..
 rsync -ahAX --inplace --numeric-ids .files/ out/
@@ -103,7 +108,14 @@ done
 cd ..
 
 echo "Running custom plugins"
-run-parts --exit-on-error -v plugins
+# run-parts replacement (not packaged on Arch); explicit order matching alphabetical run-parts
+# 64bo (64-bit-only) is REQUIRED: NOS 4.1 ships no 32-bit libntf.so, so 32-bit zygote can't
+# start (libhwui->libntf link fails) -> boot hang. Device is 64-bit-primary by design.
+# The WebView bundled in files/ is 32-bit and won't work here; sourcing a real 64-bit WebView.
+for pl in plugins/64bo plugins/jemalloc plugins/overlay plugins/prop; do
+  echo "run-parts: executing $pl"
+  bash "$pl"
+done
 
 echo "Unmounting"
 for i in $MOD; do

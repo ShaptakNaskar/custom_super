@@ -215,20 +215,6 @@ user::rwx
 group::r-x
 other::r-x
 
-# file: product/app/Chrome64
-# owner: 0
-# group: 0
-user::rwx
-group::r-x
-other::r-x
-
-# file: product/app/Chrome64/Chrome64.apk
-# owner: 0
-# group: 0
-user::rw-
-group::r--
-other::r--
-
 # file: product/app/TrichromeLibrary64
 # owner: 0
 # group: 0
@@ -529,4 +515,25 @@ other::r-x
 user::rwx
 group::r-x
 other::r-x
+
+# file: product/priv-app/com.chiller3.bcr
+# owner: 0
+# group: 0
+user::rwx
+group::r-x
+other::r-x
+
+# file: product/priv-app/com.chiller3.bcr/app-release.apk
+# owner: 0
+# group: 0
+user::rw-
+group::r--
+other::r--
+
+# file: product/etc/permissions/privapp-permissions-com.chiller3.bcr.xml
+# owner: 0
+# group: 0
+user::rw-
+group::r--
+other::r--
 

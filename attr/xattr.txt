@@ -88,12 +88,6 @@ security.selinux="u:object_r:system_lib_file:s0"
 # file: system/system/lib64/libc.so
 security.selinux="u:object_r:system_lib_file:s0"
 
-# file: product/app/Chrome64
-security.selinux="u:object_r:system_file:s0"
-
-# file: product/app/Chrome64/Chrome64.apk
-security.selinux="u:object_r:system_file:s0"
-
 # file: product/app/TrichromeLibrary64
 security.selinux="u:object_r:system_file:s0"
 
@@ -207,4 +201,13 @@ security.selinux="u:object_r:vendor_file:s0"
 
 # file: vendor/lib64/libvpx.so
 security.selinux="u:object_r:vendor_file:s0"
+
+# file: product/priv-app/com.chiller3.bcr
+security.selinux="u:object_r:system_file:s0"
+
+# file: product/priv-app/com.chiller3.bcr/app-release.apk
+security.selinux="u:object_r:system_file:s0"
+
+# file: product/etc/permissions/privapp-permissions-com.chiller3.bcr.xml
+security.selinux="u:object_r:system_file:s0"
 
