@@ -21,20 +21,22 @@ ALIGN=$((4 * 1024 * 1024)) # 4 MiB
 
 SUPER_SIZE=7516192768
 
-# NOS 4.1 system/system_ext outgrew arter97's 4.0 ext4 caps and all-ext4 can't fit the 7GiB super.
-# Build them as erofs (compressed, read-only) like product already is and like stock 4.1 ships them.
+# NOS 4.1 system/system_ext outgrew arter97's 4.0 ext4 caps. Keep both as
+# ext4 because EROFS there breaks emulated storage with the supported SUSFS
+# kernels; product and vendor stay compressed as EROFS so everything fits.
 ODM_SIZE=2
 PRODUCT_SIZE=0
 SYSTEM_EXT_SIZE=1400
 SYSTEM_SIZE=1600
 VENDOR_DLKM_SIZE=45
-# erofs (0): without 64bo the 32-bit vendor libs are kept, so vendor no longer fits ext4; compress it like stock
+# EROFS (0): compress vendor like stock.
 VENDOR_SIZE=0
 
 ACTIVE_SLOT=a
 INACTIVE_SLOT=b
 
-STOCK_FIRMWARE=/home/sappy/projects/nothingmuch-pong/dyn-4.1
+STOCK_FIRMWARE=${STOCK_FIRMWARE:-/home/sappy/projects/nothingmuch-pong/Newupdate/PongNew}
+DYNAMIC_PARTITIONS=(odm product system system_ext vendor vendor_dlkm)
 
 TMP=/tmp/$(uuidgen)
 
@@ -62,8 +64,10 @@ MOD=$( ( ls files; ( grep -o '^[^#]*' remove.txt || true ) | awk -F/ '{print $1}
 cleanup
 
 mkdir -p out
-for f in "$STOCK_FIRMWARE/"*.img; do
-  ln -s $(losetup -f --show -b 4096 --sizelimit $(avb_get_orig_size "$f") "$f") out/$(basename $f)
+for i in "${DYNAMIC_PARTITIONS[@]}"; do
+  f="$STOCK_FIRMWARE/$i.img"
+  [ -f "$f" ] || { echo "Missing stock partition: $f" 1>&2; exit 1; }
+  ln -s "$(losetup -f --show -b 4096 --sizelimit "$(avb_get_orig_size "$f")" "$f")" "out/$i.img"
 done
 for i in $MOD; do
   mkdir -p orig/$i out/$i

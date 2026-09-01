@@ -15,17 +15,18 @@ product/app/TrichromeLibrary
 product/app/WebViewGoogle
 
 # Debloat
+product/app/CalendarGoogle
 product/app/Drive
+product/app/Gemini
 product/app/Gmail2
 product/app/Keep
 product/app/Maps
 product/app/Meet
 product/app/Photos
+product/app/SpeechServicesByGoogle
 product/app/Videos
 product/app/YouTube
 product/app/YTMusic
-product/app/CalendarGoogle
-product/app/SpeechServicesByGoogle
 
 # Fix DRM to L3
 vendor/lib/liboemcrypto.so
@@ -43,11 +44,7 @@ system/system/lib64/bootstrap/hwasan/libc.so
 system/system/lib/bootstrap/libm.so
 system/system/lib64/bootstrap/libm.so
 
-# zramwriteback
-vendor/*zramwriteback*
-
 # Debug
-system_ext/etc/init/init.qti.bt.logger.rc
 system_ext/etc/init/nt_bpf.rc
 system_ext/etc/init/nt_core.rc
 system_ext/etc/init/nt_logkit.rc

@@ -22,24 +22,30 @@ mount the stock dynamic partitions, debloat (`remove.txt`), overlay changes
 (`files/`, `append/`, `overlay/`), run tweak scripts (`plugins/`), then rebuild
 `super.img` with `lpmake`. No device tree needed; no Android source build.
 
-## Current release: r41 (Nothing OS 4.1, build 260618)
+## Current release: r42 (Nothing OS 4.1, build 260818)
 
 Carried over from arter97's r40:
 - Debloat, AOSPA LMKD, patched bionic, `msm_irqbalance`, jemalloc zero-fill on camera
 - 64-bit-only (`64bo`), Google Sans + framework overlay, DPI 360, 30-step volume + Dirac fix
 - Display/logd/NFC tweaks
 
-Changed for 4.1:
+Changed since arter97's r40:
 - **64-bit WebView** — arter97's bundled `WebViewGoogle64` ships a *32-bit*
   `libmonochrome_64.so`, unusable in a 64-bit-only ROM (GMS crash-loop). Now uses
-  the stock 4.1 WebView, which has a real `lib/arm64-v8a/libmonochrome.so`.
+  the stock WebView from the selected build, which has a real
+  `lib/arm64-v8a/libmonochrome.so`.
 - **Chrome removed** — Nothing's Chrome is 32-bit via the Trichrome shared library,
   so it crash-loops under `64bo`. Install from Play instead.
-- **[BCR](https://github.com/chenxiaolong/BCR) bundled** as a `product` priv-app
-  (call recording), with its privapp-permissions whitelist.
 - Build fixes for modern hosts: bionic symlink `ELOOP` tolerance, erofs for
-  system/system_ext/vendor (4.1 outgrew arter97's ext4 caps), `run-parts` replaced,
+  product/vendor (system and system_ext remain ext4), `run-parts` replaced,
   `apktool 2.9.3` + `apksigner` for the overlay.
+
+Changed for r42:
+- Rebased onto `Pong-B4.1-260818-1726` (August 2026 security update).
+- BCR and its privileged-permission whitelist are no longer bundled.
+- Gemini (new in 260818) added to the debloat list.
+- The build accepts a complete firmware dump and selects only the six dynamic
+  partitions that belong in `super.img`.
 
 ## Building it yourself
 
@@ -85,14 +91,15 @@ cd ..  &&  git clone --depth 1 https://android.googlesource.com/platform/externa
 ### 2. Get a stock Nothing OS 4.1 dump
 
 Download the full OTA zip for **Pong** (this ROM is built against
-`Pong-B4.1-260618`), then extract the partition images:
+`Pong-B4.1-260818-1726`), then extract the partition images:
 
 ```bash
-payload-dumper-go -o stock/ Pong_B4.1-260618.zip
+payload-dumper-go -o stock/ Pong_B4.1-260818-1726.zip
 ```
 
 You need the six dynamic partitions: `system system_ext product vendor odm vendor_dlkm`.
-Put them (or symlinks) in one directory, e.g. `~/pong/dyn-4.1/`.
+Put them (or symlinks) in one directory. A complete payload dump is also valid;
+the build only reads the six dynamic partitions listed above.
 
 ### 3. Extract the proprietary WebView
 
@@ -110,7 +117,7 @@ crash-loop GMS on this 64-bit-only ROM.
 ### 4. Point make.sh at your dump
 
 ```bash
-sed -i 's|^STOCK_FIRMWARE=.*|STOCK_FIRMWARE=/home/you/pong/dyn-4.1|' make.sh
+export STOCK_FIRMWARE=/home/you/pong/PongNew
 ```
 
 Sanity-check the sizes near the top of `make.sh`:
@@ -136,7 +143,7 @@ build-tools and keys, or drop `plugins/overlay` from the loop in `make.sh` to sk
 ### 6. Build
 
 ```bash
-sudo ./make.sh
+sudo --preserve-env=STOCK_FIRMWARE ./make.sh
 ```
 
 Output is `out/super.img` (~6.5 GB sparse). The build mounts the stock images
